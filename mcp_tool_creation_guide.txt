@@ -1,0 +1,182 @@
+Guide to Creating New MCP Tools
+================================
+
+This guide walks through the complete process of adding a new tool to an MCP server.
+
+1. DEFINE YOUR TOOL'S TYPES
+--------------------------
+Location: At the top of your server file (e.g., src/server/yourServer.ts)
+
+Example:
+```typescript
+type YourToolParams = {
+    param1: string;
+    param2: number;
+    optionalParam?: boolean;
+};
+```
+
+2. CREATE THE TOOL'S MAIN FUNCTION
+--------------------------------
+Location: After type definitions, before the main() function
+
+Example:
+```typescript
+async function yourToolFunction(params: YourToolParams): Promise<CallToolResult> {
+    try {
+        // Your tool's logic here
+        const result = await doSomething(params);
+        
+        return {
+            content: [{
+                type: "text" as const,
+                text: JSON.stringify({
+                    result: result,
+                    message: "Operation successful"
+                })
+            }]
+        };
+    } catch (error) {
+        if (error instanceof Error) {
+            return {
+                content: [{
+                    type: "text" as const,
+                    text: `Operation failed: ${error.message}`,
+                }],
+                isError: true,
+            };
+        }
+        throw error;
+    }
+}
+```
+
+3. ADD TOOL TO SERVER CAPABILITIES
+--------------------------------
+Location: In the main() function, within the McpServer constructor
+
+Example:
+```typescript
+const server = new McpServer(
+    {
+        name: "your-server",
+        version: "1.0.0",
+        description: "Server description"
+    },
+    {
+        capabilities: {
+            tools: {
+                your_tool_name: {
+                    name: "your_tool_name",
+                    title: "Human Readable Tool Name",
+                    description: "Detailed description of what your tool does",
+                    version: "1.0.0",
+                    inputSchema: {
+                        type: "object",
+                        properties: {
+                            param1: {
+                                type: "string",
+                                description: "Description of param1"
+                            },
+                            param2: {
+                                type: "number",
+                                description: "Description of param2"
+                            },
+                            optionalParam: {
+                                type: "boolean",
+                                description: "Description of optionalParam"
+                            }
+                        },
+                        required: ["param1", "param2"]
+                    }
+                }
+            }
+        }
+    }
+);
+```
+
+4. REGISTER THE TOOL WITH THE SERVER
+----------------------------------
+Location: In the main() function, after server creation
+
+Example:
+```typescript
+server.tool(
+    "your_tool_name",
+    "Description of your tool",
+    {
+        param1: z.string(),
+        param2: z.number(),
+        optionalParam: z.boolean().optional(),
+    },
+    async (args: YourToolParams, _extra: RequestHandlerExtra) => yourToolFunction(args)
+);
+```
+
+5. REBUILD AND TEST
+-----------------
+1. Build the server:
+   ```bash
+   npm run build
+   ```
+
+2. Test the server:
+   ```bash
+   node dist/esm/server/yourServer.js
+   ```
+
+3. Add to mcp.json:
+   ```json
+   {
+     "servers": [
+       {
+         "name": "your-server",
+         "command": "node /full/path/to/dist/esm/server/yourServer.js",
+         "transport": "stdio"
+       }
+     ]
+   }
+   ```
+
+IMPORTANT NOTES
+--------------
+1. Tool Names:
+   - Use snake_case for tool names
+   - Make names descriptive but concise
+   - Avoid special characters
+
+2. Error Handling:
+   - Always wrap your tool's logic in try/catch
+   - Return proper error responses using CallToolResult
+   - Include helpful error messages
+
+3. Type Safety:
+   - Define proper TypeScript types for all parameters
+   - Use zod schemas for runtime validation
+   - Make sure optional parameters are marked as such
+
+4. Documentation:
+   - Write clear descriptions for your tool and all parameters
+   - Include examples in the description if helpful
+   - Document any side effects (e.g., file creation)
+
+5. Testing:
+   - Test your tool with various inputs
+   - Test error conditions
+   - Verify the tool appears in Cursor's MCP tool list
+
+EXAMPLE USAGE IN CURSOR
+----------------------
+```typescript
+const result = await mcp.your_tool_name({
+    param1: "value1",
+    param2: 42,
+    optionalParam: true
+});
+
+const response = JSON.parse(result.content[0].text);
+console.log(response.result);
+```
+
+Remember to restart Cursor after adding new tools to see them in the MCP tool list. 

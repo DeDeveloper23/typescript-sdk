@@ -1,0 +1,9 @@
+{
+  "servers": [
+    {
+      "name": "image-generation-server",
+      "command": "node /Users/abhishekde/Documents/dev/typescript-sdk/dist/esm/server/imageGenerationServer.js",
+      "transport": "stdio"
+    }
+  ]
+} 
