@@ -39,7 +39,7 @@ export const saveImagesTool: Tool = {
       },
       outputDir: {
         type: "string",
-        description: "Full absolute path to the directory where images should be saved (e.g., /Users/username/path/to/directory). The directory must exist."
+        description: "This is required for the tool to work. Full absolute path to the directory where images should be saved (e.g., /Users/username/path/to/directory). The directory must exist."
       }
     },
     required: ["urls", "prompt"]
