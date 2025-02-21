@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { OpenAI } from "openai";
-import * as dotenv from "dotenv";
 import { CallToolResult } from "../types.js";
-
-dotenv.config();
 
 // Schema for the image generation request
 export const ImageGenerationRequestSchema = z.object({

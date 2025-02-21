@@ -7,11 +7,15 @@ import { z } from "zod";
 import fetch from "node-fetch";
 import fs from "fs/promises";
 import path from "path";
-import * as dotenv from "dotenv";
 import { imageGenerationTool } from "../shared/tools/imageGeneration.js";
 import { saveImagesTool } from "../shared/tools/saveImages.js";
 
-dotenv.config();
+// Check for API key in environment
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.error("OpenAI API key is not available in environment variables. Please export OPENAI_API_KEY='your-key'");
+  process.exit(1);
+}
 
 type ImageGenerationParams = {
   prompt: string;
@@ -114,14 +118,8 @@ async function saveImages(params: SaveImagesParams): Promise<CallToolResult> {
 }
 
 async function generateImage(params: ImageGenerationParams): Promise<CallToolResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error("OpenAI API key is not available");
-  }
-
   const openai = new OpenAI({
-    apiKey: apiKey
+    apiKey: OPENAI_API_KEY
   });
 
   try {

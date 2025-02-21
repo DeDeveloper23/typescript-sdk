@@ -43,11 +43,11 @@
     "test": "jest",
     "start": "npm run server",
     "server": "tsx watch --clear-screen=false src/cli.ts server",
-    "client": "tsx src/cli.ts client"
+    "client": "tsx src/cli.ts client",
+    "image-server": "node dist/esm/server/imageGenerationServer.js"
   },
   "dependencies": {
     "content-type": "^1.0.5",
-    "dotenv": "^16.4.7",
     "eventsource": "^3.0.2",
     "node-fetch": "^2.7.0",
     "openai": "^4.85.3",
